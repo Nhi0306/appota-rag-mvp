@@ -1,0 +1,16 @@
+# Đơn vị tổ chức — 4 cấp: Tập đoàn → Công ty → Phòng → Nhóm
+# Đường dẫn unit là chuỗi cấp, cha của mọi unit đều được xem
+# (ví dụ user ở media.nd.g1 được xem doc cho phép appota, media, media.nd, media.nd.g1)
+
+units:
+  appota:    { name: "Tập đoàn Appota", parent: null }
+  media:     { name: "Appota Media", parent: appota }
+  media.nd:  { name: "Phòng Nội Dung", parent: media }
+  media.nd.g1: { name: "Nhóm Nội Dung 1", parent: "media.nd" }
+  media.nd.g2: { name: "Nhóm Nội Dung 2", parent: "media.nd" }
+  media.kt:  { name: "Phòng Kế Toán", parent: media }
+  media.ns:  { name: "Phòng Nhân Sự", parent: media }
+  tech:      { name: "Appota Tech", parent: appota }
+  tech.kt:   { name: "Phòng Kỹ Thuật", parent: tech }
+  tech.kt.be: { name: "Nhóm Backend", parent: tech.kt }
+  tech.kt.fe: { name: "Nhóm Frontend", parent: tech.kt }

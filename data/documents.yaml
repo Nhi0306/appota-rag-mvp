@@ -1,0 +1,249 @@
+# Bộ dữ liệu giả lập — KHÔNG chứa dữ liệu thật của Appota
+# Quy ước:
+#   status  = active | draft | expired      (draft/expired KHÔNG được dùng)
+#   effective = ngày bắt đầu / kết thúc hiệu lực (null = hiện hành)
+#   scope_units  = danh sách unit được phép xem (cha được dùng chung cho con)
+#   scope_groups = danh sách nhóm quyền được phép xem (giao với groups của user)
+#   family  = nhóm phiên bản/tài liệu cùng chủ đề (để phát hiện mâu thuẫn và bản đặc thù)
+
+documents:
+  # ---- GIA ĐÌNH "nghi-phep" : kiểm tra PHIÊN BẢN + BẢN ĐẶC THÙ + BẢN NHÁP ----
+  - id: "qd-nghi-phep-2024"
+    title: "Quy định nghỉ phép năm 2024"
+    family: "nghi-phep"
+    version: "2024.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2024-01-01"
+    effective_to: "2024-12-31"
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Theo Quy định nghỉ phép năm 2024, nhân viên được nghỉ 12 ngày phép năm.
+      Số phép chưa dùng được giữ sang năm sau tối đa 15 ngày.
+      Toàn bộ quy định này hết hiệu lực kể từ ngày 31/12/2024, thay thế bằng bản 2025.
+
+  - id: "qd-nghi-phep-2025"
+    title: "Quy định nghỉ phép (Bản hiện hành)"
+    family: "nghi-phep"
+    version: "2025.2"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2025-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Chi tiết cụ thể:
+      Tổng số ngày nghỉ phép năm của nhân viên là 14 ngày.
+      Mỗi nhân viên được nghỉ phép cộng thêm 1 ngày cho mỗi 3 năm công tác liên tục, tối đa cộng 3 ngày.
+      Phép năm phải được đăng ký trước ít nhất 3 ngày làm việc.
+
+  - id: "qd-nghi-phep-phu-luc-nd"
+    title: "Phụ lục nghỉ phép riêng của Phòng Nội Dung"
+    family: "nghi-phep"
+    version: "2025.1"
+    unit: "media.nd"
+    scope_units: ["media.nd"]
+    scope_groups: []
+    effective_from: "2025-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Phụ lục này áp dụng cho toàn bộ nhân sự Phòng Nội Dung (Appota Media) và áp dụng thay cho
+      điều 3 của Quy định nghỉ phép chung khi tổ chức sự kiện: nhân sự Phòng Nội Dung được nghỉ
+      16 ngày phép năm; trong tháng có sự kiện lớn, đơn xin phép cần được trưởng phòng phê duyệt
+      trước 7 ngày làm việc.
+
+  - id: "ban-nhap-qd-nghi-phep-2026"
+    title: "Quy định nghỉ phép 2026 (Bản nháp chưa ban hành)"
+    family: "nghi-phep"
+    version: "2026.0-draft"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "draft"
+    category: "quy-dinh-nhan-su"
+    content: |
+      (BẢN NHÁP — chưa có hiệu lực) Dự thảo nâng tổng số ngày phép năm lên 15 ngày.
+      Không được dùng bản nháp để trả lời câu hỏi về quyền lợi.
+
+  # ---- MẪU THUẪN : hai bản cùng hiệu lực, nội dung KHÁC nhaU ----
+  - id: "qd-wfh-a"
+    title: "Chính sách làm việc từ xa (Bản A)"
+    family: "wfh"
+    version: "2025.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2025-03-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân viên được làm việc từ xa tối đa 2 ngày mỗi tuần.
+      Những ngày làm việc từ xa cần đăng ký với quản lý trực tiếp trước 1 ngày.
+
+  - id: "qd-wfh-b"
+    title: "Chính sách làm việc từ xa (Bản B)"
+    family: "wfh"
+    version: "2025.2"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2025-03-15"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân viên được làm việc từ xa tối đa 3 ngày mỗi tuần.
+      Những ngày làm việc từ xa cần đăng ký với quản lý trực tiếp trước 1 ngày.
+
+  # ---- NHẠY CẢM, chỉ quản lý xem ----
+  - id: "qd-ngan-sach-q1-media"
+    title: "Ngân sách quý 1 — Appota Media"
+    family: "ngan-sach"
+    version: "2026.1"
+    unit: "media"
+    scope_units: ["media"]
+    scope_groups: ["manager"]
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "active"
+    category: "co-mat-kinh-doanh"
+    content: |
+      Ngân sách quý 1 năm 2026 của Appota Media là 1,2 tỷ đồng.
+      Ngân sách nội dung chiếm 45%; ngân sách marketing chiếm 35%; còn lại cho vận hành.
+      Thông tin ngân sách chỉ dành cho cấp quản lý.
+
+  - id: "cs-thuong-2025"
+    title: "Chính sách thưởng cuối năm"
+    family: "thuong"
+    version: "2025.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: ["manager"]
+    effective_from: "2025-12-01"
+    effective_to: null
+    status: "active"
+    category: "co-mat-kinh-doanh"
+    content: |
+      Thưởng cuối năm dựa trên hoàn thành KPI, tối đa 2 tháng lương cơ bản.
+      Công thức và danh sách người được thưởng do HR xác nhận trước ngày 15/12.
+      Thông tin thưởng cụ thể chỉ công bố tới cấp quản lý.
+
+  - id: "hop-dong-ncc-media"
+    title: "Hợp đồng nhà cung cấp nội dung 2025–2026"
+    family: "hop-dong"
+    version: "2025.1"
+    unit: "media"
+    scope_units: ["media"]
+    scope_groups: ["manager"]
+    effective_from: "2025-07-01"
+    effective_to: "2026-06-30"
+    status: "active"
+    category: "co-mat-kinh-doanh"
+    content: |
+      Hợp đồng với đối tác XYZ có giá trị 500 triệu đồng, hết hạn tháng 6/2026.
+      Đối tác chịu trách nhiệm cung cấp 120 bài viết mỗi quý.
+      Toàn văn hợp đồng thuộc phạm vi quản lý và phòng pháp chế.
+
+  # ---- TÀI LIỆU THEO ĐƠN VỊ ----
+  - id: "bb-hop-g1-2026-01"
+    title: "Biên bản họp Nhóm Nội Dung 1 — 01/2026"
+    family: "bien-ban"
+    version: "2026.1"
+    unit: "media.nd.g1"
+    scope_units: ["media.nd.g1"]
+    scope_groups: []
+    effective_from: "2026-01-10"
+    effective_to: null
+    status: "active"
+    category: "noi-bo-nhom"
+    content: |
+      Biên bản họp nhóm Nội Dung 1 ngày 10/01/2026 ghi nhận kế hoạch: hoàn thành 30 bài viết SEO
+      trong quý 1, phân công biên tập viên đăng bài thứ 3 và thứ 6 hàng tuần.
+      Tài liệu nội bộ nhóm, không chia sẻ ngoài nhóm.
+
+  - id: "quy-trinh-be-deploy"
+    title: "Quy trình triển khai Backend (CI/CD)"
+    family: "quy-trinh-ky-thuat"
+    version: "2025.3"
+    unit: "tech.kt.be"
+    scope_units: ["tech.kt.be"]
+    scope_groups: []
+    effective_from: "2025-06-01"
+    effective_to: null
+    status: "active"
+    category: "quy-trinh-ky-thuat"
+    content: |
+      Quy trình triển khai Backend gồm 4 bước: build, chạy unit test, deploy staging,
+      và deploy production có chốt hạ tầng. Branch main phải merge kèm merge request có ít nhất 1 approve.
+      Tài liệu chỉ dùng cho nhóm Backend.
+
+  - id: "quy-trinh-tang-ca-nd"
+    title: "Quy trình đăng ký tăng ca — Phòng Nội Dung"
+    family: "tang-ca"
+    version: "2025.1"
+    unit: "media.nd"
+    scope_units: ["media.nd"]
+    scope_groups: []
+    effective_from: "2025-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân sự Phòng Nội Dung đăng ký tăng ca qua form nội bộ, trưởng phòng duyệt trước
+      khi làm. Thời gian tăng ca làm quá 1 ngày thường được tính theo quy định của
+      Tập đoàn về thù lao ngoài giờ.
+
+  - id: "qd-ot-tech"
+    title: "Quy định tăng ca riêng — Appota Tech"
+    family: "tang-ca"
+    version: "2025.1"
+    unit: "tech"
+    scope_units: ["tech"]
+    scope_groups: []
+    effective_from: "2025-03-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Tăng ca ở Appota Tech được tính 1.5 lần lương giờ vào ngày thường, 2 lần vào cuối tuần,
+      và 3 lần vào ngày lễ. Người lao động có thể chọn nghỉ bù thay cho tiền.
+
+  # ---- TÀI LIỆU CHUNG, ÁP DỤNG TOÀN TẬP ĐOÀN ----
+  - id: "qd-nghi-le-2026"
+    title: "Quy định nghỉ lễ năm 2026"
+    family: "nghi-le"
+    version: "2026.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Tổng số ngày nghỉ lễ trong năm 2026 là 11 ngày, gồm Tết Dương lịch, Tết Nguyên đán,
+      30/4, 1/5, Quốc khánh 2/9 theo quy định chung của nhà nước và thêm 1 ngày do công ty quy định.
+
+  - id: "qd-bao-mat"
+    title: "Chính sách bảo mật thông tin nội bộ"
+    family: "bao-mat"
+    version: "2025.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2025-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-chung"
+    content: |
+      Cấm chia sẻ tài liệu nội bộ, tài khoản và dữ liệu khách hàng ra ngoài công ty.
+      Tài liệu mật chỉ trao đổi qua kênh được mã hóa. Vi phạm bị xử lý kỷ luật theo mức nặng.

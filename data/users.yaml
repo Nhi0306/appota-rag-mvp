@@ -1,0 +1,21 @@
+users:
+  - id: "u_nguyen_anh"
+    name: "Nguyễn Anh"
+    unit: "media.nd.g1"
+    role: "Nhân viên — Nhóm Nội Dung 1"
+    groups: []
+  - id: "u_tran_binh"
+    name: "Trần Bình"
+    unit: "media.kt"
+    role: "Nhân viên — Phòng Kế Toán"
+    groups: []
+  - id: "u_le_chi"
+    name: "Lê Chi"
+    unit: "media.nd"
+    role: "Trưởng phòng Nội Dung"
+    groups: ["manager"]
+  - id: "u_pham_duc"
+    name: "Phạm Đức"
+    unit: "tech.kt.be"
+    role: "Nhân viên — Nhóm Backend"
+    groups: []
