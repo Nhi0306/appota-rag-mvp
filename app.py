@@ -69,8 +69,14 @@ def show_answer(answer):
         st.write("top matches:", answer.debug)
 
 
+st.divider()
+st.subheader("Hỏi hệ thống")
+st.caption("Gõ bất kỳ câu hỏi nào bạn muốn — không bắt buộc chọn từ gợi ý. Sau đó bấm **Hỏi** (hoặc nhấn Enter ở ô nhập).")
+
+st.session_state.setdefault("question", "")
+st.session_state.setdefault("last_quick", None)
 q_quick = st.pills(
-    "Câu hỏi gợi ý",
+    "Gợi ý nhanh (bấm để điền vào ô bên dưới, hoặc tự gõ câu của bạn)",
     [
         "Quy định nghỉ phép của tôi như thế nào?",
         "Chính sách làm việc từ xa cho tối đa mấy ngày 1 tuần?",
@@ -80,16 +86,28 @@ q_quick = st.pills(
         "Quy trình triển khai Backend của nhóm kỹ thuật thế nào?",
     ],
     selection_mode="single",
-    accept_new_options=True,
 )
+if q_quick and q_quick != st.session_state["last_quick"]:
+    st.session_state["question"] = q_quick
+    st.session_state["last_quick"] = q_quick
 
-st.divider()
-st.subheader("Thử ngay")
-q = st.text_input("Câu hỏi của bạn:", value=q_quick if q_quick else "")
+col_q, col_btn = st.columns([6, 1])
+with col_q:
+    q = st.text_area(
+        "Nhập câu hỏi của bạn:",
+        key="question",
+        height=90,
+        placeholder="Ví dụ: Quy định nghỉ phép của tôi như thế nào?",
+    )
+with col_btn:
+    st.write("")
+    st.write("")
+    submitted = st.button("Hỏi", type="primary", use_container_width=True)
+
 if q.strip():
     show_answer(engine.answer(q, user))
 else:
-    st.info("Gõ câu hỏi hoặc chọn một gợi ý bên trên. Đổi người dùng ở khung trái để thấy cùng một câu hỏi trả về kết quả khác nhau theo quyền.")
+    st.info("Gõ câu hỏi rồi bấm Hỏi. Đổi người dùng ở khung trái để thấy cùng một câu hỏi trả về kết quả khác nhau theo quyền.")
 
 st.divider()
 st.subheader("Demo bắt buộc: cùng câu hỏi, hai bối cảnh khác nhau")
