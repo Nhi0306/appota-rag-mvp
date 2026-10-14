@@ -40,11 +40,7 @@ Chạy bộ kiểm thử (sinh `tests/report.md`):
 python tests/run_tests.py
 ```
 
-## 3. Chạy bằng video
-
-Kịch bản video 5 phút: [`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md).
-
-## 4. Cấu trúc
+## 3. Cấu trúc
 
 ```
 appota-rag-mvp/
@@ -68,7 +64,7 @@ appota-rag-mvp/
 └─ Dockerfile              # để deploy lên bất kỳ nơi nào chạy được container
 ```
 
-## 5. Cách engine làm việc (đọc 60 giây)
+## 4. Cách engine làm việc (đọc 60 giây)
 
 Mỗi văn bản có metadata: `unit` (đơn vị ban hành), `scope_units` (chuỗi đơn vị được phép),
 `scope_groups` (nhóm quyền), `effective_from/to` (hiệu lực), `status` (active/draft/expired), `family` (chủ đề).
@@ -89,7 +85,7 @@ Pipeline mỗi câu hỏi (`ragscope/engine.py::answer`):
 7. **Trả lời có nguồn** — câu trả lời kèm tài liệu, phiên bản, ngày hiệu lực để người dùng tự kiểm chứng.
    Không đủ căn cứ → từ chối với câu trả lời dùng chung cho mọi lý do (không lộ việc "có tồn tại văn bản ngoài quyền").
 
-## 6. Vì sao MVP không có LLM / không gọi API ngoài
+## 5. Vì sao MVP không có LLM / không gọi API ngoài
 
 - Phần **quyết định quyền, hiệu lực, mâu thuẫn** là code xác định — đúng thứ MVP cần chứng minh.
 - Không gọi API ngoài → **chạy offline**, không cần key, không lộ dữ liệu ra ngoài, dễ tái lập kết quả.
@@ -98,7 +94,7 @@ Pipeline mỗi câu hỏi (`ragscope/engine.py::answer`):
 Nếu muốn thêm LLM: `engine.py` trả về văn bản + nguồn đã lọc sẵn, chỉ cần nối một model để diễn đạt lại
 dựa trên dữ liệu đã được phép (không cho model "tự chọn" nguồn).
 
-## 7. Bản chạy online
+## 6. Bản chạy online
 
 Hướng dẫn deploy nhanh bằng Streamlit Community Cloud:
 
@@ -110,7 +106,7 @@ Hướng dẫn deploy nhanh bằng Streamlit Community Cloud:
 > mạng giới hạn + chưa có tài khoản nền tảng deploy. Hướng dẫn trên đã đủ để chạy lại `app.py`.
 > Không cần biến môi trường nào.
 
-## 8. Hạn chế trung thực của MVP
+## 7. Hạn chế trung thực của MVP
 
 - **Chưa có LLM** để diễn đạt tự nhiên — câu trả lời là trích đoạn văn bản, không "tóm tắt" mượt.
 - **Chưa có cơ chế "mức tin cậy"**: khi câu hỏi chạm văn bản ngoài quyền, hệ thống trả lời đúng phần
@@ -118,7 +114,7 @@ Hướng dẫn deploy nhanh bằng Streamlit Community Cloud:
 - **Metadata là chìa khóa**: nếu người quản trị gắn sai `scope_units`/ngày hiệu lực thì mọi tầng sau đều sai theo.
 - Dữ liệu giả lập đơn giản hơn thực tế (ít văn bản trùng tên, ít tầng).
 
-## 9. Kết quả kiểm thử
+## 8. Kết quả kiểm thử
 
 `tests/report.md` — **11/11 case đạt**, bao gồm: 4 case "tốt", 2 case "khó/mơ hồ", 4 case "an toàn",
 1 case "chưa xử lý tốt" (thất bại trung thực).
