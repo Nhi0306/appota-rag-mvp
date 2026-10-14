@@ -306,6 +306,6 @@ else:
 st.divider()
 st.markdown(
     "<div class='foot'>Bộ kiểm thử: 11 tình huống, kèm nhận định Đạt/Chưa đạt và bài học "
-    "— xem <code>tests/report.md</code>. Kịch bản video demo: <code>docs/VIDEO_SCRIPT.md</code>.</div>",
+    "— xem <code>tests/report.md</code>.</div>",
     unsafe_allow_html=True,
 )

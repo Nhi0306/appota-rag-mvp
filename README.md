@@ -59,8 +59,7 @@ appota-rag-mvp/
 │  ├─ run_tests.py         # 11 tình huống, tự sinh báo cáo
 │  └─ report.md            # Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được
 ├─ docs/
-│  ├─ CAU_TRA_LOI_MISSION2.md
-│  └─ VIDEO_SCRIPT.md
+│  └─ CAU_TRA_LOI_MISSION2.md
 └─ Dockerfile              # để deploy lên bất kỳ nơi nào chạy được container
 ```
 
