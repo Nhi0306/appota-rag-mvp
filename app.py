@@ -71,12 +71,12 @@ def show_answer(answer):
 
 st.divider()
 st.subheader("Hỏi hệ thống")
-st.caption("Gõ bất kỳ câu hỏi nào bạn muốn — không bắt buộc chọn từ gợi ý. Sau đó bấm **Hỏi** (hoặc nhấn Enter ở ô nhập).")
+st.caption("Gõ câu hỏi rồi nhấn **Enter** (hoặc bấm nút **Hỏi**). Bạn có thể hỏi bao nhiêu câu tùy thích — không bắt buộc chọn từ gợi ý.")
 
 st.session_state.setdefault("question", "")
 st.session_state.setdefault("last_quick", None)
 q_quick = st.pills(
-    "Gợi ý nhanh (bấm để điền vào ô bên dưới, hoặc tự gõ câu của bạn)",
+    "Gợi ý nhanh (bấm để hỏi luôn một câu mẫu, hoặc tự gõ câu của bạn bên dưới)",
     [
         "Quy định nghỉ phép của tôi như thế nào?",
         "Chính sách làm việc từ xa cho tối đa mấy ngày 1 tuần?",
@@ -93,21 +93,19 @@ if q_quick and q_quick != st.session_state["last_quick"]:
 
 col_q, col_btn = st.columns([6, 1])
 with col_q:
-    q = st.text_area(
+    q = st.text_input(
         "Nhập câu hỏi của bạn:",
         key="question",
-        height=90,
         placeholder="Ví dụ: Quy định nghỉ phép của tôi như thế nào?",
     )
 with col_btn:
-    st.write("")
     st.write("")
     submitted = st.button("Hỏi", type="primary", use_container_width=True)
 
 if q.strip():
     show_answer(engine.answer(q, user))
 else:
-    st.info("Gõ câu hỏi rồi bấm Hỏi. Đổi người dùng ở khung trái để thấy cùng một câu hỏi trả về kết quả khác nhau theo quyền.")
+    st.info("Gõ câu hỏi rồi nhấn Enter (hoặc bấm Hỏi). Đổi người dùng ở khung trái để thấy cùng một câu hỏi trả về kết quả khác nhau theo quyền.")
 
 st.divider()
 st.subheader("Demo bắt buộc: cùng câu hỏi, hai bối cảnh khác nhau")
