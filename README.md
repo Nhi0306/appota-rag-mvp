@@ -31,6 +31,9 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+Giao diện: chọn người dùng ở khung trái → gợi ý nhanh hoặc tự gõ câu hỏi → nhấn Enter. **5 lượt hỏi
+gần nhất** được giữ lại (có nút xóa lịch sử) để không mất kết quả cũ khi hỏi câu mới.
+
 Chạy bộ kiểm thử (sinh `tests/report.md`):
 
 ```bash
