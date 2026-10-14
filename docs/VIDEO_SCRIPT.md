@@ -24,15 +24,16 @@ Mình hiện thực hóa đúng ý đó trong MVP."
 quyền của người hỏi — điều kiện AND, vừa đúng đơn vị vừa đúng nhóm; bước 3 mới chạy tìm kiếm và
 trả lời kèm nguồn, phiên bản, ngày hiệu lực. Toàn bộ chạy offline trong ~50ms, không gọi API ngoài."
 
-## 1:40–3:30 — Demo (bấm các nút trong app)
+## 1:40–3:30 — Demo (đổi người dùng ở khung trái, gõ câu hỏi rồi nhấn Enter)
 
-"Ví dụ 1 — cùng câu hỏi nghỉ phép. Nguyễn Anh, Phòng Nội Dung, nhận phụ lục riêng: 16 ngày.
-Trần Bình, Phòng Kế Toán, nhận đúng bản chung của mình: 14 ngày. Vì phụ lục của Phòng Nội Dung
-nằm ngoài chuỗi quyền của Trần Bình nên nó không bao giờ lọt vào câu trả lời."
+"Ví dụ 1 — cùng câu hỏi nghỉ phép. Đứng ở Nguyễn Anh, Phòng Nội Dung, gõ câu hỏi và nhận phụ lục
+riêng: 16 ngày. Đổi người dùng sang Trần Bình, Phòng Kế Toán, hỏi lại đúng câu đó, nhận bản chung
+của mình: 14 ngày. Vì phụ lục của Phòng Nội Dung nằm ngoài chuỗi quyền của Trần Bình nên nó không
+bao giờ lọt vào câu trả lời."
 
 "Ví dụ 2 — ngân sách quý 1. Trần Bình, nhân viên, không có nhóm quyền: hệ thống từ chối, trả về
-câu chung chung — không lộ dù chỉ một dấu hiệu có tồn tại số liệu. Lê Chi, trưởng phòng, nhóm
-quản lý: nhận 1,2 tỷ đồng kèm nguồn."
+câu chung chung — không lộ dù chỉ một dấu hiệu có tồn tại số liệu. Đổi sang Lê Chi, trưởng phòng,
+nhóm quản lý, hỏi lại: nhận 1,2 tỷ đồng kèm nguồn."
 
 "Nhấn mạnh: hai trường hợp từ chối giống nhau hệt nhau trên màn hình; lý do chi tiết chỉ nằm
 trong log nội bộ. Đó là cách chống lộ thông tin."

@@ -108,28 +108,8 @@ else:
     st.info("Gõ câu hỏi rồi nhấn Enter (hoặc bấm Hỏi). Đổi người dùng ở khung trái để thấy cùng một câu hỏi trả về kết quả khác nhau theo quyền.")
 
 st.divider()
-st.subheader("Demo bắt buộc: cùng câu hỏi, hai bối cảnh khác nhau")
-c1, c2 = st.columns(2)
-with c1:
-    st.markdown("**1) Nghỉ phép — Phòng Nội Dung vs Phòng Kế Toán**")
-    if st.button("Chạy demo nghỉ phép"):
-        a1 = engine.answer("Quy định nghỉ phép của tôi như thế nào?", users["u_nguyen_anh"])
-        a2 = engine.answer("Quy định nghỉ phép của tôi như thế nào?", users["u_tran_binh"])
-        st.markdown(f"**{users['u_nguyen_anh'].name}** ({users['u_nguyen_anh'].unit}):")
-        st.info(a1.text)
-        st.markdown(f"**{users['u_tran_binh'].name}** ({users['u_tran_binh'].unit}):")
-        st.info(a2.text)
-        st.caption("Phụ lục riêng của Phòng Nội Dung (16 ngày) thắng bản chung (14 ngày) — người Phòng Kế Toán chỉ thấy bản chung.")
-with c2:
-    st.markdown("**2) Ngân sách quý 1 — Nhân viên vs Quản lý**")
-    if st.button("Chạy demo ngân sách"):
-        a1 = engine.answer("Ngân sách quý 1 của công ty là bao nhiêu?", users["u_tran_binh"])
-        a2 = engine.answer("Ngân sách quý 1 của công ty là bao nhiêu?", users["u_le_chi"])
-        st.markdown(f"**{users['u_tran_binh'].name}** (nhân viên, không nhóm quyền):")
-        st.info(a1.text)
-        st.markdown(f"**{users['u_le_chi'].name}** (trưởng phòng, nhóm manager):")
-        st.info(a2.text)
-        st.caption("Nhân viên bị từ chối với câu trả lời chung chung (không lộ việc có số liệu ngân sách); quản lý nhận số liệu hợp lệ.")
-
-st.divider()
+st.caption(
+    "Muốn thấy cùng một câu hỏi cho hai bối cảnh khác nhau: đổi **người dùng ở khung trái** rồi hỏi lại "
+    "đúng câu đó — kết quả sẽ thay đổi theo quyền."
+)
 st.caption("Xem bộ kiểm thử đầy đủ (11 case, kèm nhận định Đạt/Chưa đạt và bài học): `tests/report.md`.")

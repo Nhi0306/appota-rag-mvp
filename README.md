@@ -45,7 +45,7 @@ Kịch bản video 5 phút: [`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md).
 
 ```
 appota-rag-mvp/
-├─ app.py                  # giao diện Streamlit (demo + demo "cùng câu hỏi - hai bối cảnh")
+├─ app.py                  # giao diện Streamlit (chọn người dùng + ô nhập câu hỏi tự do)
 ├─ data/
 │  ├─ org.yaml             # sơ đồ tổ chức 4 cấp: Tập đoàn → Công ty → Phòng → Nhóm
 │  ├─ users.yaml           # 4 người dùng giả lập (2 phòng, 1 quản lý, 1 công ty khác)
