@@ -8,28 +8,18 @@ import yaml
 
 from .audit import AuditLogger
 from .bm25 import BM25, _tokens
-from .data_loader import load_documents, load_users, scope_depth, usable, visible, visibility_reason
+from .conversation import expand_with_context
+from .data_loader import load_documents, load_users, usable, visible, visibility_reason
 from .models import Answer, Source
 from .org import ancestors, load_units, unit_level_name
+from .scope_resolver import matched_unit, resolve_scope, scope_report
+from .text import STOPWORDS, substantive_words
 from .versioning import diff_documents, sort_versions
 
 
 def _split_sentences(text: str) -> list:
     parts = re.split(r"(?<=[.])\s+(?=[^\d\s])", text.strip())
     return [p.strip() for p in parts if p.strip()]
-
-
-STOPWORDS = {
-    "quy", "định", "trình", "thế", "nào", "ra", "sao", "bao", "nhiêu",
-    "của", "tôi", "như", "cho", "với", "để", "và", "là", "có", "theo",
-    "được", "thì", "nếu", "hay", "nên", "đó", "này", "một", "không",
-    "đang", "đã", "sẽ", "tại", "về", "thế", "tất", "cả", "mấy", "ông",
-}
-
-
-def substantive_words(query: str) -> set:
-    words = [w.lower() for w in re.findall(r"[a-zà-ỹ0-9]+", query.lower())]
-    return {w for w in words if len(w) >= 3 and w not in STOPWORDS}
 
 
 def _snippet(doc, question: str, radius=1) -> str:
@@ -105,23 +95,15 @@ class Engine:
                 return d
         raise KeyError(doc_id)
 
-    def _select(self, top):
-        if not top:
-            return None, [], False
-        best = top[0][0]
-        fam = best.family or best.id
-        cands = [d for d, s in top if (d.family or d.id) == fam]
-        if len(cands) < 2:
-            return best, cands, False
-        depths = [scope_depth(d) for d in cands]
-        mx = max(depths)
-        deepest = [d for d in cands if scope_depth(d) == mx]
-        if len(deepest) == 1:
-            return deepest[0], cands, False
-        contents = {d.content.strip() for d in deepest}
-        if len(contents) > 1:
-            return None, deepest, True
-        return deepest[0], deepest, False
+    def _select(self, candidates, anc):
+        """Chọn tài liệu áp dụng cho người hỏi trong nhóm tài liệu cùng chủ đề.
+
+        Change Request B3: tài liệu cùng chủ đề có thể nằm ở nhiều cấp
+        (Tập đoàn / Công ty / Phòng ban). Quy tắc: bản áp dụng ở cấp GẦN người hỏi
+        nhất thắng; hai bản cùng cấp mà nội dung khác nhau thì không tự chọn.
+        """
+        res = resolve_scope(candidates, anc)
+        return res["chosen"], res["applied"], res["conflict"], res["levels"]
 
     def _coverage(self, question, chosen):
         qtoks = substantive_words(question)
@@ -130,12 +112,13 @@ class Engine:
         missing = sorted(qtoks - found)
         return {"found": sorted(found), "missing": missing, "partial": bool(missing)}
 
-    def answer(self, question: str, user, as_of=None) -> Answer:
+    def answer(self, question: str, user, as_of=None, context=None) -> Answer:
         as_of = as_of or self.today
         anc = ancestors(user.unit, self.units)
+        effective_question, used_context = expand_with_context(question, context)
         usable_docs = [d for d in self.documents if usable(d, as_of, self.units)]
         bm25 = BM25(usable_docs) if usable_docs else None
-        all_res = bm25.search(question) if bm25 else []
+        all_res = bm25.search(effective_question) if bm25 else []
         top_all = all_res[:8]
 
         def _refuse(reason, detail=""):
@@ -147,7 +130,9 @@ class Engine:
             })
             return Answer(kind="REFUSE", text=REFUSAL_TEXT, sources=srcs, reason=reason,
                           debug={"top_all": [(d.id, round(s, 3)) for d, s in top_all[:5]],
-                                 "detail": detail, "as_of": as_of},
+                                 "detail": detail, "as_of": as_of,
+                                 "effective_question": effective_question,
+                                 "context_used": used_context},
                           as_of=as_of, audit_id=audit_id)
 
         if not all_res or all_res[0][1] < self.threshold:
@@ -161,27 +146,61 @@ class Engine:
         if not visible(best_all_doc, anc, user.groups) and vis_res[0][1] < 0.5 * best_all_s:
             return _refuse("out_of_scope", "best global match not visible and in-scope score too low")
 
-        top = vis_res[:6]
-        chosen, cands, conflict = self._select(top)
+        # Change Request B3: cùng một chủ đề có thể có bản ở nhiều cấp tổ chức.
+        # Gom TOÀN BỘ văn bản cùng family mà người hỏi được phép xem (không chỉ
+        # top-6 theo điểm BM25) rồi mới quyết định bản nào áp dụng.
+        best_vis_doc, best_vis_score = vis_res[0]
+        fam = best_vis_doc.family or best_vis_doc.id
+        score_map = {d.id: s for d, s in all_res}
+        fam_docs = [d for d in usable_docs
+                    if (d.family or d.id) == fam and visible(d, anc, user.groups)]
+        relevant = [d for d in fam_docs if score_map.get(d.id, 0.0) > 0] or [best_vis_doc]
 
-        substantives = substantive_words(question)
-        candidates_for_answer = [chosen] if chosen else cands
+        chosen, applied_docs, conflict_docs, levels = self._select(relevant, anc)
+        cands = conflict_docs or applied_docs or relevant
+
+        substantives = substantive_words(effective_question)
         if substantives and not any(
             substantives & set(w.lower() for w in re.findall(r"[a-zà-ỹ0-9]+", d.title + " " + d.content))
-            for d in candidates_for_answer
+            for d in relevant
         ):
             return _refuse("no_source", "substantive terms absent from candidate text")
 
-        if conflict:
-            score_map = {d.id: s for d, s in top}
+        best_dist = None
+        if levels:
+            best_dist = min(e["dist"] for e in levels)
+        unit_names = {k: v["name"] for k, v in self.units.items()}
+        applied_report, other_report = scope_report(levels, best_dist, unit_names,
+                                                   conflict=bool(conflict_docs))
+        scope_info = {
+            "family": fam,
+            "chosen": {
+                "doc_id": chosen.id,
+                "title": chosen.title,
+                "unit": chosen.unit,
+                "unit_name": unit_names.get(chosen.unit, chosen.unit),
+                "level": unit_level_name(chosen.unit),
+                "version": chosen.version,
+            } if chosen else None,
+            "applied": applied_report,
+            "other_levels": other_report,
+            "conflict": bool(conflict_docs),
+        }
+
+        if conflict_docs:
             srcs = [source_of(d, self.units, score=score_map.get(d.id, 0.0),
-                              snippet=_snippet(d, question, radius=0), as_of=as_of) for d in cands]
+                              snippet=_snippet(d, effective_question, radius=0), as_of=as_of)
+                    for d in conflict_docs]
             lines = []
-            for i, d in enumerate(cands, 1):
-                snip = _snippet(d, question, radius=0)
-                lines.append(f'{i}. {d.title} (bản {d.version}): "{snip}"')
+            for i, d in enumerate(conflict_docs, 1):
+                snip = _snippet(d, effective_question, radius=0)
+                lines.append(
+                    f'{i}. {d.title} — cấp {unit_level_name(d.unit)} '
+                    f'({_unit_name(d, self.units)}), bản {d.version}: "{snip}"'
+                )
             text = (
-                "Lưu ý: hiện có hai văn bản cùng giai đoạn hiệu lực nhưng nội dung khác nhau về chủ đề này:\n\n"
+                "Lưu ý: hiện có hai văn bản cùng cấp áp dụng và cùng giai đoạn hiệu lực "
+                "nhưng nội dung khác nhau về chủ đề này:\n\n"
                 + "\n\n".join(lines) +
                 "\n\nHệ thống không tự chọn. Bạn hãy xác nhận văn bản nào được áp dụng, "
                 "hoặc liên hệ Phòng Nhân Sự để chốt hiệu lực."
@@ -189,24 +208,40 @@ class Engine:
             audit_id = self.audit.log({
                 "user_id": user.id, "user_unit": user.unit, "question": question,
                 "as_of": as_of, "result": "CONFLICT", "reason": "conflict",
-                "chosen": None, "sources": [d.id for d in cands],
+                "chosen": None, "sources": [d.id for d in conflict_docs],
+                "context_used": used_context, "scope": scope_info,
             })
             return Answer(kind="CONFLICT", text=text, sources=srcs, reason="conflict",
                           debug={"top_all": [(d.id, round(s, 3)) for d, s in top_all[:5]],
-                                 "visible_ids": [d.id for d in cands], "as_of": as_of},
-                          as_of=as_of, confidence="low", audit_id=audit_id)
+                                 "visible_ids": [d.id for d in fam_docs], "as_of": as_of,
+                                 "effective_question": effective_question,
+                                 "context_used": used_context},
+                          as_of=as_of, confidence="low", audit_id=audit_id, scope=scope_info)
 
-        snip = _snippet(chosen, question)
+        snip = _snippet(chosen, effective_question)
         fr = chosen.effective_from.isoformat()
         to = chosen.effective_to.isoformat() if chosen.effective_to else "hiện hành"
         text = (
             f"Được. Theo {chosen.title} (bản {chosen.version}, hiệu lực {fr} → {to}):\n\n"
             f'"{snip}"'
         )
-        score_map = {d.id: s for d, s in top}
         srcs = [source_of(d, self.units, score=score_map.get(d.id, 0.0),
-                          snippet=_snippet(d, question, radius=0), as_of=as_of) for d in cands]
+                          snippet=_snippet(d, effective_question, radius=0), as_of=as_of)
+                for d in fam_docs]
         coverage = self._coverage(question, chosen)
+        if used_context:
+            text += ("\n\n(Câu hỏi này được hiểu theo ngữ cảnh các lượt hỏi trước của bạn "
+                     "trong cùng phiên.)")
+        if other_report:
+            others = "; ".join(
+                f'«{o["title"]}» (cấp {o["level"]})' for o in other_report
+            )
+            text += (
+                f"\n\n(Đối chiếu theo cấp: hệ thống áp dụng «{chosen.title}» của "
+                f"{scope_info['chosen']['unit_name']} — cấp {scope_info['chosen']['level']} — "
+                f"vì đây là cấp gần đơn vị của bạn nhất. Cùng chủ đề nhưng ở cấp khác: "
+                f"{others} — bản đặc thù của cấp gần bạn hơn được ưu tiên.)"
+            )
         if coverage.get("partial") and coverage.get("missing"):
             text += ("\n\nLưu ý: câu trả lời có thể chưa đầy đủ về: "
                      + ", ".join(coverage["missing"]) + ". "
@@ -214,15 +249,61 @@ class Engine:
         audit_id = self.audit.log({
             "user_id": user.id, "user_unit": user.unit, "question": question,
             "as_of": as_of, "result": "OK", "reason": "ok",
-            "chosen": chosen.id, "sources": [d.id for d in cands],
-            "coverage": coverage,
+            "chosen": chosen.id, "sources": [d.id for d in fam_docs],
+            "coverage": coverage, "context_used": used_context, "scope": scope_info,
         })
         return Answer(kind="OK", text=text, sources=srcs, reason="ok",
-                      debug={"chosen": chosen.id, "visible_ids": [d.id for d in cands],
+                      debug={"chosen": chosen.id, "visible_ids": [d.id for d in fam_docs],
                              "top_all": [(d.id, round(s, 3)) for d, s in top_all[:5]],
-                             "as_of": as_of},
+                             "as_of": as_of, "context_used": used_context,
+                             "effective_question": effective_question},
                       as_of=as_of, confidence="high" if not coverage.get("partial") else "medium",
-                      coverage=coverage, audit_id=audit_id)
+                      coverage=coverage, audit_id=audit_id, scope=scope_info)
+
+    def scope_levels(self, user_id: str, family: str = None, as_of=None) -> list:
+        """Đối chiếu các bản cùng chủ đề theo cấp tổ chức, từ góc nhìn người hỏi.
+
+        Mỗi văn bản người hỏi được phép xem sẽ được gắn:
+          - cấp áp dụng (level), đơn vị, khoảng cách tới đơn vị của người hỏi
+          - applies = True nếu đây là bản sẽ được dùng để trả lời
+          - reason: vì sao áp dụng / không áp dụng
+        """
+        as_of = as_of or self.today
+        user = self.user_by_id(user_id)
+        anc = ancestors(user.unit, self.units)
+        docs = [d for d in self.documents if usable(d, as_of, self.units)]
+        if family:
+            docs = [d for d in docs if (d.family or d.id) == family]
+        docs = [d for d in docs if visible(d, anc, user.groups)]
+        unit_names = {k: v["name"] for k, v in self.units.items()}
+
+        entries = []
+        for d in docs:
+            unit = matched_unit(d, anc)
+            if unit is None:
+                continue
+            entries.append({
+                "doc_id": d.id,
+                "title": d.title,
+                "version": d.version,
+                "unit": unit,
+                "unit_name": unit_names.get(unit, unit),
+                "level": unit_level_name(unit),
+                "distance": anc.index(unit),
+                "effective_from": d.effective_from.isoformat() if d.effective_from else "",
+                "effective_to": d.effective_to.isoformat() if d.effective_to else "",
+            })
+        if not entries:
+            return []
+        best = min(e["distance"] for e in entries)
+        for e in entries:
+            if e["distance"] == best:
+                e["applies"] = True
+                e["reason"] = "cấp gần đơn vị của bạn nhất — được áp dụng"
+            else:
+                e["applies"] = False
+                e["reason"] = "cấp %s chung hơn — bị bản đặc thù của cấp gần bạn hơn thay thế" % e["level"]
+        return sorted(entries, key=lambda e: (e["distance"], e["doc_id"]))
 
     def explain(self, doc_id: str, user_id: str, as_of=None) -> dict:
         as_of = as_of or self.today

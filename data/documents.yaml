@@ -247,3 +247,56 @@ documents:
     content: |
       Cấm chia sẻ tài liệu nội bộ, tài khoản và dữ liệu khách hàng ra ngoài công ty.
       Tài liệu mật chỉ trao đổi qua kênh được mã hóa. Vi phạm bị xử lý kỷ luật theo mức nặng.
+
+  # ---- CHANGE REQUEST B3: XUNG ĐỘT GIỮA CÁC CẤP ----
+  # Cùng một chủ đề (family) nhưng mỗi cấp ban hành một quy định riêng:
+  #   - cấp Tập đoàn (appota) áp dụng chung
+  #   - cấp công ty thành viên (media, tech) áp dụng riêng cho nhân sự công ty đó
+  # Người hỏi thuộc đơn vị nào sẽ được trả lời theo quy định của đúng cấp đó.
+  - id: "qd-cty-tv-appota"
+    title: "Quy định làm việc tại công ty thành viên (cấp Tập đoàn)"
+    family: "cong-vi-cong-bo"
+    version: "2026.1"
+    unit: "appota"
+    scope_units: ["appota"]
+    scope_groups: []
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân viên được cử sang làm việc tại công ty thành viên khác tối đa 10 ngày mỗi năm.
+      Công ty nhận cử bố trí chỗ ở và chịu trách nhiệm theo dõi kết quả công việc hằng tháng.
+      Quy định này là mức chung áp dụng cho toàn Tập đoàn khi công ty thành viên chưa ban hành quy định riêng.
+
+  - id: "qd-cty-tv-media"
+    title: "Quy định làm việc tại công ty thành viên — Appota Media"
+    family: "cong-vi-cong-bo"
+    version: "2026.1"
+    unit: "media"
+    scope_units: ["media"]
+    scope_groups: []
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân viên Appota Media được cử sang làm việc tại công ty thành viên khác tối đa 5 ngày mỗi năm.
+      Trưởng phòng phê duyệt trước khi đăng ký. Số ngày này không trừ vào phép năm của nhân viên.
+      Mức 5 ngày thay cho mức 10 ngày do Tập đoàn ban hành.
+
+  - id: "qd-cty-tv-tech"
+    title: "Quy định làm việc tại công ty thành viên — Appota Tech"
+    family: "cong-vi-cong-bo"
+    version: "2026.1"
+    unit: "tech"
+    scope_units: ["tech"]
+    scope_groups: []
+    effective_from: "2026-01-01"
+    effective_to: null
+    status: "active"
+    category: "quy-dinh-nhan-su"
+    content: |
+      Nhân viên Appota Tech được cử sang làm việc tại công ty thành viên khác tối đa 7 ngày mỗi năm.
+      Lịch làm việc tại công ty nhận cử áp dụng cho ca kỹ thuật trực ban đêm.
+      Mức 7 ngày thay cho mức 10 ngày do Tập đoàn ban hành.

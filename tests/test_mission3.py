@@ -116,3 +116,84 @@ def test_partial_coverage_note():
     # coverage recorded
     assert isinstance(a.coverage, dict)
     assert "found" in a.coverage
+
+
+# ------------------------------------------------------------------
+# CHANGE REQUEST B3 — xung đột giữa các cấp (Group vs công ty thành viên)
+# ------------------------------------------------------------------
+
+Q_CTY_TV = "Nhân viên được cử sang làm việc tại công ty thành viên khác tối đa bao nhiêu ngày?"
+
+
+def test_b3_group_level_uses_group_rule():
+    """Cấp Group (appota) → áp dụng quy định của Tập đoàn (10 ngày)."""
+    a = engine.answer(Q_CTY_TV, U("u_hoang_minh"))
+    assert a.kind == "OK", a.kind
+    assert "10 ngày" in a.text
+    assert "5 ngày" not in a.text
+    assert "7 ngày" not in a.text
+    assert a.debug["chosen"] == "qd-cty-tv-appota"
+
+
+def test_b3_company_level_uses_company_rule():
+    """Cấp công ty thành viên → áp dụng quy định riêng của công ty (Media 5 ngày)."""
+    a = engine.answer(Q_CTY_TV, U("u_nguyen_anh"))
+    assert a.kind == "OK", a.kind
+    assert "5 ngày" in a.text
+    assert "10 ngày" not in a.text
+    assert a.debug["chosen"] == "qd-cty-tv-media"
+
+
+def test_b3_other_company_uses_its_own_rule():
+    """Cấu trúc khác (tech) vẫn dùng đúng quy định của công ty mình (7 ngày)."""
+    a = engine.answer(Q_CTY_TV, U("u_pham_duc"))
+    assert a.kind == "OK", a.kind
+    assert "7 ngày" in a.text
+    assert "10 ngày" not in a.text
+    assert a.debug["chosen"] == "qd-cty-tv-tech"
+
+
+def test_b3_same_level_conflict_is_not_silently_chosen():
+    """Hai bản CÙNG cấp cùng hiệu lực nhưng khác nội dung → CONFLICT, không tự chọn."""
+    a = engine.answer("Chính sách làm việc từ xa cho tôi được bao nhiêu ngày?", U("u_hoang_minh"))
+    assert a.kind == "CONFLICT", a.kind
+    assert len(a.sources) == 2
+    assert "2 ngày" in a.text and "3 ngày" in a.text
+    assert a.scope["conflict"] is True
+
+
+def test_b3_scope_reports_applied_and_other_levels():
+    """Bản đối chiếu cấp cho biết bản nào áp dụng, bản nào bị thay thế."""
+    a = engine.answer(Q_CTY_TV, U("u_nguyen_anh"))
+    applied = {x["doc_id"] for x in a.scope["applied"]}
+    others = {x["doc_id"] for x in a.scope["other_levels"]}
+    assert applied == {"qd-cty-tv-media"}
+    assert "qd-cty-tv-appota" in others
+    # Không lộ nội dung (số ngày) của bản không áp dụng trong câu trả lời.
+    assert "10 ngày" not in a.text
+
+
+def test_b3_scope_levels_api():
+    """API đối chiếu cấp: bản gần người hỏi nhất được đánh dấu áp dụng."""
+    rows = engine.scope_levels("u_nguyen_anh", family="cong-vi-cong-bo")
+    ids = [r["doc_id"] for r in rows]
+    assert "qd-cty-tv-media" in ids
+    on = [r for r in rows if r["applies"]]
+    assert [r["doc_id"] for r in on] == ["qd-cty-tv-media"]
+    assert on[0]["distance"] == 2  # media.nd.g1 → media.nd → media
+    others = [r for r in rows if not r["applies"]]
+    assert others and "gần bạn hơn" in others[0]["reason"]
+
+
+def test_b3_regression_same_question_same_family_different_levels():
+    """Regression: cùng câu hỏi, mức áp dụng khác nhau theo đơn vị của người hỏi."""
+    a_group = engine.answer(Q_CTY_TV, U("u_hoang_minh"))
+    a_media = engine.answer(Q_CTY_TV, U("u_nguyen_anh"))
+    a_tech = engine.answer(Q_CTY_TV, U("u_pham_duc"))
+    assert "10 ngày" in a_group.text
+    assert "5 ngày" in a_media.text
+    assert "7 ngày" in a_tech.text
+    for a in (a_group, a_media, a_tech):
+        assert a.kind == "OK"
+        assert a.scope["family"] == "cong-vi-cong-bo"
+        assert a.scope["chosen"]["doc_id"] in a.scope["applied"][0]["doc_id"]

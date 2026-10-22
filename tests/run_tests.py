@@ -27,6 +27,8 @@ REPORT = os.path.join(BASE, "tests", "report.md")
 
 engine = Engine(DATA)
 
+Q_CTY_TV = "Nhân viên được cử sang làm việc tại công ty thành viên khác tối đa bao nhiêu ngày?"
+
 
 def u(user_id):
     return engine.user_by_id(user_id)
@@ -198,6 +200,67 @@ CASES = [
         question="Kế hoạch nội dung SEO của Nhóm Nội Dung 1 tháng 1 là gì?",
         expect={"kind": "REFUSE"},
         lesson="Biên bản họp nhóm g1 là tài liệu chỉ nhóm ấy xem; người phòng khác bị từ chối đồng nhất với mọi trường hợp từ chối khác.",
+    ),
+    # ---- CHANGE REQUEST B3: xung đột giữa các cấp ----
+    dict(
+        id="T12",
+        group="tốt",
+        name="B3 — cấp Group áp dụng quy định của Tập đoàn (10 ngày)",
+        user="u_hoang_minh",
+        question=Q_CTY_TV,
+        expect={
+            "kind": "OK",
+            "chosen": "qd-cty-tv-appota",
+            "contains": ["10 ngày"],
+            "not_contains": ["5 ngày", "7 ngày"],
+            "has_source": True,
+        },
+        lesson=(
+            "Người hỏi ở cấp Group không được tự động dùng quy định của công ty thành viên. "
+            "Mức áp dụng phải theo đúng cấp của người hỏi."
+        ),
+    ),
+    dict(
+        id="T13",
+        group="tốt",
+        name="B3 — cấp công ty thành viên dùng quy định riêng (Media 5 ngày), không phải mức chung 10 ngày",
+        user="u_nguyen_anh",
+        question=Q_CTY_TV,
+        expect={
+            "kind": "OK",
+            "chosen": "qd-cty-tv-media",
+            "contains": ["5 ngày"],
+            "not_contains": ["10 ngày", "7 ngày"],
+            "has_source": True,
+        },
+        lesson=(
+            "Bản đặc thù của công ty thay bản chung của Tập đoàn. Trước B3, hệ thống so độ sâu tuyệt đối "
+            "(appota và media cùng depth 1) nên báo CONFLICT giả cho câu hỏi này."
+        ),
+    ),
+    dict(
+        id="T14",
+        group="khó",
+        name="B3 — hai bản CÙNG cấp, cùng hiệu lực, khác nội dung → vẫn phải báo CONFLICT",
+        user="u_hoang_minh",
+        question="Chính sách làm việc từ xa cho tôi được bao nhiêu ngày?",
+        expect={"kind": "CONFLICT", "n_sources": 2, "contains": ["2 ngày", "3 ngày"]},
+        lesson=(
+            "B3 chỉ giải quyết mâu thuẫn GIỮA các cấp. Mâu thuẫn trong cùng một cấp vẫn phải đưa ra "
+            "cho người dùng xác nhận — không tự chọn."
+        ),
+    ),
+    dict(
+        id="T15",
+        group="an-toan",
+        name="B3 — câu trả lời không lộ nội dung của bản ở cấp khác (không rò số ngày của Tập đoàn)",
+        user="u_nguyen_anh",
+        question=Q_CTY_TV,
+        expect={"kind": "OK", "not_contains": ["10 ngày"], "has_source": True},
+        lesson=(
+            "Khi nêu đối chiếu các cấp, hệ thống chỉ nêu TÊN văn bản và cấp của bản không áp dụng, "
+            "không trích số liệu của bản đó — tránh gây hiểu nhầm là nhiều mức áp dụng cùng lúc."
+        ),
     ),
 ]
 

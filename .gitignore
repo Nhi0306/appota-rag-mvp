@@ -10,3 +10,5 @@ smoke.txt
 .idea/
 .vscode/
 audit.jsonl
+chat.db
+data/chat.db

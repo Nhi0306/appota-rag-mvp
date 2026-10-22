@@ -19,3 +19,8 @@ users:
     unit: "tech.kt.be"
     role: "Nhân viên — Nhóm Backend"
     groups: []
+  - id: "u_hoang_minh"
+    name: "Hoàng Minh"
+    unit: "appota"
+    role: "Nhân viên — Khối Tập đoàn (cấp Group)"
+    groups: []

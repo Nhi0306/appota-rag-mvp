@@ -56,3 +56,4 @@ class Answer:
     confidence: str = "high"
     coverage: dict = field(default_factory=dict)
     audit_id: str = ""
+    scope: dict = field(default_factory=dict)  # đối chiếu giữa các cấp (Change Request B3)
