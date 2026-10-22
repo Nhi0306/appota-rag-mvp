@@ -12,3 +12,5 @@ smoke.txt
 audit.jsonl
 chat.db
 data/chat.db
+*.docx
+*.pdf
