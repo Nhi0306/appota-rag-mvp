@@ -395,12 +395,10 @@ if turns:
     if st.button("Xóa lịch sử phiên của tôi", use_container_width=False):
         store.clear(uid)
         st.rerun()
-else:
-    st.info("Gõ câu hỏi rồi nhấn Enter (hoặc bấm Hỏi). Sau khi hỏi, ô nhập sẽ trống lại.")
 
 st.divider()
 st.markdown(
-    "<div class='foot'>Bộ kiểm thử: 11 tình huống Mission 2 + 10 test Mission 3, "
+    "<div class='foot'>Bộ kiểm thử: 15 tình huống (11 Mission 2 + 4 B3) và 25 test pytest, "
     "kèm nhận định Đạt/Chưa đạt và bài học — xem <code>tests/report.md</code>.</div>",
     unsafe_allow_html=True,
 )

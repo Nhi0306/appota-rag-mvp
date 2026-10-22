@@ -55,7 +55,7 @@ appota-rag-mvp/
 ├─ data/
 │  ├─ org.yaml             # sơ đồ tổ chức 4 cấp: Tập đoàn → Công ty → Phòng → Nhóm
 │  ├─ users.yaml           # 5 người dùng giả lập (2 phòng, 1 quản lý, 1 Group, 1 công ty khác)
-│  ├─ documents.yaml       # 19 văn bản giả lập kèm metadata đầy đủ
+│  ├─ documents.yaml       # 18 văn bản giả lập kèm metadata đầy đủ
 │  ├─ chat.db              # phiên hỏi theo người dùng (SQLite, git-ignored)
 │  └─ audit.jsonl          # nhật ký truy vấn (git-ignored)
 ├─ ragscope/               # engine thuần Python, không gọi API ngoài
