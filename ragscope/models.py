@@ -38,6 +38,11 @@ class Source:
     unit_name: str
     effective_from: date
     effective_to: Optional[date]
+    unit_id: str = ""
+    level: str = ""
+    score: float = 0.0
+    snippet: str = ""
+    as_of: Optional[date] = None
 
 
 @dataclass
@@ -45,5 +50,9 @@ class Answer:
     kind: str  # "OK" | "CONFLICT" | "REFUSE"
     text: str
     sources: list
-    reason: str = ""  # nội bộ: ok | no_source | out_of_scope
+    reason: str = ""  # n?i b?: ok | no_source | out_of_scope
     debug: dict = field(default_factory=dict)
+    as_of: Optional[date] = None
+    confidence: str = "high"
+    coverage: dict = field(default_factory=dict)
+    audit_id: str = ""

@@ -66,5 +66,20 @@ def visible(doc: Document, unit_ancestors: list, user_groups: list) -> bool:
 
 
 def scope_depth(doc: Document) -> int:
-    depths = [len([p for p in u.split(".") if p]) for u in doc.scope_units]
+    depths = [len([p for p in u.split(".") if u]) for u in doc.scope_units]
     return max(depths) if depths else 0
+
+
+def visibility_reason(doc: Document, unit_ancestors: list, user_groups: list, today: date) -> tuple:
+    reasons = []
+    if doc.status != "active":
+        reasons.append("inactive_status")
+    if doc.effective_from is None or doc.effective_from > today:
+        reasons.append("not_yet_effective")
+    if doc.effective_to is not None and doc.effective_to < today:
+        reasons.append("expired")
+    if not (set(doc.scope_units) & set(unit_ancestors)):
+        reasons.append("out_of_scope_unit")
+    if doc.scope_groups and not (set(doc.scope_groups) & set(user_groups)):
+        reasons.append("out_of_scope_group")
+    return (len(reasons) == 0, reasons)

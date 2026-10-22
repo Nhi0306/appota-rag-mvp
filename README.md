@@ -117,3 +117,20 @@ Hướng dẫn deploy nhanh bằng Streamlit Community Cloud:
 
 `tests/report.md` — **11/11 case đạt**, bao gồm: 4 case "tốt", 2 case "khó/mơ hồ", 4 case "an toàn",
 1 case "chưa xử lý tốt" (thất bại trung thực).
+
+## 9. Mission 3 - Cai tien
+
+Chay test Mission 3:
+
+`ash
+python -m pytest tests/test_mission3.py -q
+`
+
+Cai tien chinh:
+- Truy van theo thoi diem hieu luc: engine.answer(q, user, as_of=date(2024,6,1)).
+- Citation day du: don vi, cap, phien ban, hieu luc, diem, trich doan.
+- Audit log: data/audit.jsonl.
+- Muc do day du (coverage, confidence) + ghi chu khi chua day du.
+- explain() va version_diff().
+
+Chi tiet quyet dinh: docs/CAU_TRA_LOI_MISSION3.md.

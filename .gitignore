@@ -9,3 +9,4 @@ smoke.txt
 .DS_Store
 .idea/
 .vscode/
+audit.jsonl

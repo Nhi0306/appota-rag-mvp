@@ -25,3 +25,11 @@ def ancestors(unit: str, units: dict) -> list:
 
 def unit_depth(unit: str) -> int:
     return len([p for p in unit.split(".") if p])
+
+
+_LEVEL_NAMES = {1: "Tập đoàn", 2: "Công ty", 3: "Phòng ban", 4: "Nhóm"}
+
+
+def unit_level_name(unit: str) -> str:
+    d = unit_depth(unit)
+    return _LEVEL_NAMES.get(d, "Đơn vị")
