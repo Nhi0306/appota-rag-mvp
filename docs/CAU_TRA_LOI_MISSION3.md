@@ -81,25 +81,25 @@ Không thay đổi:
 
 **Khác biệt lớn nhất: quy tắc chọn bản áp dụng theo cấp tổ chức (B3).**
 
-Lý do là vì nó thay đổi **kết quả trả lời**, không chỉ mở thêm khả năng:
+Lý do là vì nó thay đổi **kết quả trả lời**, không chỉ mở thêm khả năng. Cụ thể:
 
-| | M2 (cũ) | M3 (mới) |
-|---|---|---|
-| Cách đo "cấp" | `scope_depth` — độ sâu tuyệt đối của đơn vị trong cây tổ chức | khoảng cách tới đơn vị của **người hỏi** (`ancestors(user.unit)`) |
-| Hệ quả với `appota` vs `media` | cùng depth 1 → tưởng là "cùng cấp" → `CONFLICT` | khác cấp → bản của công ty thành viên thắng, bản Tập đoàn bị thay thế |
-| Tìm ứng viên | chỉ top-6 theo điểm BM25 | **toàn bộ** văn bản cùng `family` mà người hỏi được phép xem |
+- **M2 (cũ)**: đo "cấp" bằng `scope_depth` — độ sâu tuyệt đối của đơn vị ban hành trong cây tổ chức.
+  Hệ quả: `appota` và `media` cùng có depth 1, nên hai quy định ở **hai cấp khác nhau** bị coi là "cùng cấp"
+  → hệ thống báo `CONFLICT`. Ngoài ra M2 chỉ xét **top-6 văn bản theo điểm BM25**, nên bản đặc thù ở
+  cấp sâu có thể không lọt vào ứng viên và bị bỏ qua.
+- **M3 (mới)**: đo cấp bằng **khoảng cách tới đơn vị của người hỏi** (`ancestors(user.unit)`), và
+  gom **toàn bộ** văn bản cùng `family` mà người hỏi được phép xem. Kết quả: bản của công ty thành
+  viên thắng bản chung của Tập đoàn, và câu trả lời có bảng đối chiếu các cấp.
 
-**Bằng chứng (cùng một câu hỏi, 3 người ở 3 cấp):**
+**Bằng chứng** — cùng một câu hỏi *"Nhân viên được cử sang làm việc tại công ty thành viên khác tối đa bao nhiêu ngày?"*, hỏi 3 người ở 3 cấp:
 
-> "Nhân viên được cử sang làm việc tại công ty thành viên khác tối đa bao nhiêu ngày?"
+- **Hoàng Minh** (`appota`, cấp Group / Tập đoàn) → M3 trả **10 ngày** (`qd-cty-tv-appota`). M2 cũng trả 10 ngày (đúng).
+- **Nguyễn Anh** (`media.nd.g1`, cấp Công ty Appota Media) → M3 trả **5 ngày** (`qd-cty-tv-media`).
+  M2 sẽ trả **CONFLICT giả**.
+- **Phạm Đức** (`tech.kt.be`, cấp Công ty Appota Tech) → M3 trả **7 ngày** (`qd-cty-tv-tech`).
+  M2 sẽ trả **CONFLICT giả**.
 
-| Người hỏi | Cấp | M3 trả lời | M2 sẽ trả lời |
-|---|---|---|---|
-| Hoàng Minh (`appota`) | Group / Tập đoàn | **10 ngày** (`qd-cty-tv-appota`) | 10 ngày (đúng) |
-| Nguyễn Anh (`media.nd.g1`) | Công ty Appota Media | **5 ngày** (`qd-cty-tv-media`) | ⚠️ **CONFLICT giả** |
-| Phạm Đức (`tech.kt.be`) | Công ty Appota Tech | **7 ngày** (`qd-cty-tv-tech`) | ⚠️ **CONFLICT giả** |
-
-Cột "M2 sẽ trả lời" là **mô phỏng lại đúng hàm `_select` của M2** trên bộ dữ liệu mới
+Kết quả "M2 sẽ trả lời" là **mô phỏng lại đúng hàm `_select` của M2** trên bộ dữ liệu mới
 (`git show c8c03cb:ragscope/engine.py`): cả hai đều rơi vào `CONFLICT` vì `scope_depth` bằng nhau.
 
 Test chứng minh: **case T12–T15** (`tests/report.md`) + **7 test pytest** `test_b3_*` trong
@@ -161,12 +161,10 @@ không phải độ sâu tuyệt đối:
 - Gom toàn bộ văn bản cùng `family` mà người hỏi được phép xem (không giới hạn top-6 BM25),
   vì bản đặc thù ở cấp sâu có thể không nằm trong top-6 theo điểm từ khóa.
 
-**Sau (M3).**
-| Người hỏi | Cấp | Bản áp dụng | Kết quả |
-|---|---|---|---|
-| Hoàng Minh (`appota`) | Group / Tập đoàn | `qd-cty-tv-appota` | 10 ngày |
-| Nguyễn Anh (`media.nd.g1`) | Công ty (Media) | `qd-cty-tv-media` | 5 ngày |
-| Phạm Đức (`tech.kt.be`) | Công ty (Tech) | `qd-cty-tv-tech` | 7 ngày |
+**Sau (M3).** Cùng câu hỏi, ba người ở ba cấp:
+- Hoàng Minh (`appota`, cấp Group / Tập đoàn) → bản áp dụng `qd-cty-tv-appota` → **10 ngày**.
+- Nguyễn Anh (`media.nd.g1`, cấp Công ty Appota Media) → bản áp dụng `qd-cty-tv-media` → **5 ngày**.
+- Phạm Đức (`tech.kt.be`, cấp Công ty Appota Tech) → bản áp dụng `qd-cty-tv-tech` → **7 ngày**.
 
 Câu trả lời kèm ghi chú đối chiếu cấp (chỉ nêu **tên** văn bản và cấp của bản bị thay thế,
 không trích số liệu của bản đó), và giao diện có bảng "Đối chiếu giữa các cấp".
